@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Человек — знаковая система: профессии для тех, кто превращает символы, данные и язык в понятный смысл.">
+  <meta name="theme-color" content="#08080d">
+  <title>Человек — знаковая система</title>
+  <style>
+    :root {
+      --bg: #07070b;
+      --bg-soft: #0c0c14;
+      --text: #f4f3fb;
+      --muted: #a7a4b6;
+      --line: rgba(255,255,255,.11);
+      --glass: rgba(255,255,255,.055);
+      --violet: #9b6cff;
+      --blue: #45c8ff;
+      --green: #77f6c3;
+      --gradient: linear-gradient(120deg, var(--violet), var(--blue));
+      --radius: 22px;
+      --max: 1160px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 13% 8%, rgba(120,72,255,.13), transparent 28rem),
+        radial-gradient(circle at 87% 36%, rgba(69,200,255,.08), transparent 25rem),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      opacity: .14;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, #000, transparent 88%);
+    }
+    ::selection { background: rgba(155,108,255,.45); color: white; }
+    a { color: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; }
+    :focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+
+    .reading-progress {
+      position: fixed; inset: 0 auto auto 0; z-index: 1000;
+      width: 0; height: 3px; background: var(--gradient);
+      box-shadow: 0 0 16px rgba(69,200,255,.8);
+    }
+    .cursor-dot {
+      display: none; position: fixed; left: 0; top: 0; z-index: 9999;
+      width: 10px; height: 10px; border-radius: 50%; pointer-events: none;
+      background: #fff; box-shadow: 0 0 20px 5px rgba(119,204,255,.65);
+      transform: translate(-50%,-50%); transition: width .2s, height .2s, opacity .2s;
+    }
+    @media (pointer:fine) {
+      body { cursor: none; }
+      a, button { cursor: none; }
+      .cursor-dot { display: block; }
+      .cursor-dot.active { width: 22px; height: 22px; opacity: .7; }
+    }
+
+    .container { width: min(calc(100% - 40px), var(--max)); margin-inline: auto; }
+    section { position: relative; padding: 88px 0; }
+    .eyebrow {
+      display: inline-flex; gap: 9px; align-items: center; margin: 0 0 18px;
+      color: #c8c5d6; font: 700 .72rem/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .16em; text-transform: uppercase;
+    }
+    .eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gradient); }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, .conclusion-copy { letter-spacing: -.055em; line-height: .95; }
+    h2 { margin-bottom: 28px; font-size: clamp(2.4rem, 9vw, 5.8rem); max-width: 900px; }
+    h3 { letter-spacing: -.025em; }
+    .section-lead { color: var(--muted); font-size: clamp(1.05rem, 2vw, 1.35rem); max-width: 720px; }
+    .gradient-text { color: transparent; background: var(--gradient); background-clip: text; -webkit-background-clip: text; }
+    .glass {
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
+      box-shadow: inset 0 1px rgba(255,255,255,.08), 0 26px 70px rgba(0,0,0,.22);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    }
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .75s ease, transform .75s cubic-bezier(.2,.65,.25,1); }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    .hero { min-height: 100svh; display: grid; align-items: center; padding: 80px 0 45px; overflow: hidden; }
+    .hero-content { position: relative; z-index: 2; }
+    .hero h1 { max-width: 1020px; margin-bottom: 28px; font-size: clamp(3.6rem, 13.5vw, 9.4rem); }
+    .hero-copy { margin-bottom: 36px; color: #c0bdcc; font-size: clamp(1.15rem, 2.5vw, 1.6rem); }
+    .hero-meta { margin-top: 50px; color: #747080; font: 600 .72rem/1.2 ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+      min-height: 54px; padding: 0 24px; border: 1px solid transparent; border-radius: 100px;
+      color: #090911; background: linear-gradient(110deg, #a77aff, #6edcff);
+      font-weight: 800; text-decoration: none; box-shadow: 0 12px 42px rgba(117,112,255,.25);
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .btn:hover { transform: translateY(-3px); box-shadow: 0 18px 55px rgba(117,112,255,.4); }
+    .btn .arrow { transition: transform .25s ease; }
+    .btn:hover .arrow { transform: translateY(3px); }
+    .btn.secondary { color: var(--text); background: rgba(255,255,255,.055); border-color: var(--line); box-shadow: none; }
+    .symbols { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .symbol {
+      position: absolute; color: rgba(255,255,255,.13); font: 500 clamp(1.4rem, 4vw, 3.6rem)/1 ui-monospace, monospace;
+      filter: drop-shadow(0 0 14px rgba(104,154,255,.22)); animation: drift 8s ease-in-out infinite alternate;
+      will-change: transform;
+    }
+    .symbol.binary { font-size: .72rem; line-height: 1.8; letter-spacing: .32em; color: rgba(130,200,255,.13); max-width: 145px; word-break: break-all; }
+    @keyframes drift { to { transform: translate3d(18px,-28px,0) rotate(7deg); } }
+
+    .quality-grid { display: grid; gap: 12px; margin-top: 48px; }
+    .quality { padding: 24px; min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; }
+    .quality-index { color: var(--blue); font: 700 .78rem/1 ui-monospace, monospace; }
+    .quality-icon { width: 34px; height: 34px; color: #d5c8ff; }
+    .quality h3 { margin: 22px 0 0; font-size: 1.3rem; }
+
+    .profession-grid { display: grid; gap: 16px; margin-top: 45px; }
+    .profession-card { position: relative; min-height: 330px; padding: 28px; overflow: hidden; transition: transform .35s ease, border-color .35s ease; }
+    .profession-card:hover { transform: translateY(-8px); border-color: rgba(136,153,255,.45); }
+    .profession-card::after {
+      content: ""; position: absolute; width: 150px; height: 150px; right: -60px; bottom: -70px;
+      border-radius: 50%; background: var(--glow, var(--violet)); filter: blur(65px); opacity: .22;
+    }
+    .profession-card:nth-child(2) { --glow: var(--blue); }
+    .profession-card:nth-child(3) { --glow: var(--green); }
+    .profession-number { color: #777384; font: 700 .76rem/1 ui-monospace, monospace; letter-spacing: .1em; }
+    .profession-card h3 { margin: 92px 0 14px; font-size: clamp(1.7rem, 5vw, 2.45rem); }
+    .profession-card p { color: var(--muted); font-size: 1.03rem; }
+    .ticker { margin-top: 55px; border-block: 1px solid var(--line); overflow: hidden; }
+    .ticker-track { display: flex; width: max-content; padding: 19px 0; animation: ticker 24s linear infinite; }
+    .ticker-track span { padding-right: 34px; color: #a7a2b4; font: 600 1rem/1 ui-monospace, monospace; white-space: nowrap; }
+    .ticker-track span::before { content: "✦"; margin-right: 34px; color: var(--violet); }
+    @keyframes ticker { to { transform: translateX(-50%); } }
+
+    .future-layout { display: grid; gap: 30px; }
+    .future-intro h2 { font-size: clamp(2.45rem, 8vw, 6.3rem); }
+    .future-intro .slash { color: #514e5e; }
+    .timeline { position: relative; padding: 6px 0; }
+    .timeline::before { content: ""; position: absolute; left: 10px; top: 12px; bottom: 18px; width: 1px; background: linear-gradient(var(--violet), var(--blue), transparent); }
+    .timeline-item { position: relative; padding: 0 0 34px 42px; }
+    .timeline-item::before { content: ""; position: absolute; left: 5px; top: 5px; width: 11px; height: 11px; border: 2px solid var(--blue); border-radius: 50%; background: var(--bg); box-shadow: 0 0 18px rgba(69,200,255,.6); }
+    .timeline-item span { color: #716c7d; font: 700 .7rem/1 ui-monospace, monospace; }
+    .timeline-item h3 { margin: 8px 0 0; font-size: 1.15rem; }
+    blockquote { margin: 40px 0 0; padding: 27px; font-size: clamp(1.5rem, 5vw, 2.55rem); line-height: 1.18; letter-spacing: -.035em; }
+    blockquote::before { content: "“"; display: block; height: 28px; color: var(--violet); font-size: 3rem; line-height: 1; }
+
+    .forecast-grid { display: grid; gap: 40px; margin-top: 45px; }
+    .metric { margin-bottom: 30px; }
+    .metric-head { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 12px; }
+    .metric-head strong { font-size: 1.08rem; }
+    .metric-value { color: var(--blue); font: 700 1rem/1 ui-monospace, monospace; }
+    .bar { height: 7px; overflow: hidden; border-radius: 10px; background: rgba(255,255,255,.08); }
+    .bar-fill { height: 100%; width: 0; border-radius: inherit; background: var(--gradient); box-shadow: 0 0 18px rgba(69,200,255,.45); transition: width 1.4s cubic-bezier(.2,.75,.2,1); }
+    .tags { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 34px; }
+    .tag { padding: 9px 13px; border: 1px solid var(--line); border-radius: 100px; color: #c7c3d2; background: rgba(255,255,255,.03); font-size: .83rem; }
+    .compare { display: grid; gap: 1px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--line); }
+    .compare-column { padding: 26px; background: rgba(10,10,17,.93); }
+    .compare-label { color: var(--violet); font: 700 .72rem/1 ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; }
+    .compare-column:last-child .compare-label { color: var(--green); }
+    .compare ul { margin: 24px 0 0; padding: 0; list-style: none; }
+    .compare li { padding: 13px 0; border-top: 1px solid rgba(255,255,255,.07); color: #c1becc; }
+
+    .conclusion { padding-block: 110px; text-align: center; }
+    .conclusion-copy { max-width: 1040px; margin: 0 auto 42px; font-size: clamp(2.6rem, 9.5vw, 7.3rem); font-weight: 800; }
+    .conclusion-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+    .share-status { min-height: 22px; margin: 18px 0 0; color: var(--muted); font-size: .85rem; }
+    footer { padding: 38px 0; border-top: 1px solid var(--line); color: #85818f; }
+    .footer-inner { display: flex; flex-direction: column; gap: 24px; }
+    .footer-mark { color: white; font-weight: 800; letter-spacing: -.02em; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 18px; }
+    .footer-links a { color: #a6a2b0; text-underline-offset: 4px; }
+    .back-top {
+      position: fixed; right: 18px; bottom: 18px; z-index: 20; width: 48px; height: 48px;
+      border: 1px solid var(--line); border-radius: 50%; color: white; background: rgba(13,13,21,.8);
+      backdrop-filter: blur(12px); opacity: 0; transform: translateY(15px); pointer-events: none;
+      transition: opacity .25s, transform .25s, background .25s;
+    }
+    .back-top.show { opacity: 1; transform: none; pointer-events: auto; }
+    .back-top:hover { background: rgba(83,61,140,.8); }
+
+    @media (min-width: 620px) {
+      .container { width: min(calc(100% - 64px), var(--max)); }
+      .quality-grid { grid-template-columns: repeat(2,1fr); }
+      .compare { grid-template-columns: repeat(2,1fr); }
+      .footer-inner { flex-direction: row; align-items: center; justify-content: space-between; }
+    }
+    @media (min-width: 900px) {
+      section { padding-block: 130px; }
+      .hero { padding-block: 80px 50px; }
+      .quality-grid { grid-template-columns: repeat(4,1fr); }
+      .profession-grid { grid-template-columns: repeat(3,1fr); }
+      .future-layout { grid-template-columns: 1.2fr .8fr; gap: 80px; align-items: start; }
+      .forecast-grid { grid-template-columns: .78fr 1.22fr; align-items: start; gap: 70px; }
+      blockquote { padding: 36px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="reading-progress" aria-hidden="true"></div>
+  <div class="cursor-dot" aria-hidden="true"></div>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="symbols" aria-hidden="true">
+        <span class="symbol" style="left:7%;top:16%;animation-delay:-1s">{ }</span>
+        <span class="symbol" style="left:78%;top:12%;animation-delay:-4s">&lt; &gt;</span>
+        <span class="symbol" style="left:88%;top:62%;animation-delay:-2s">#</span>
+        <span class="symbol" style="left:12%;top:76%;animation-delay:-6s">$ %</span>
+        <span class="symbol" style="left:62%;top:74%;animation-delay:-3s">&amp; *</span>
+        <span class="symbol binary" style="left:68%;top:31%;animation-delay:-5s">01001110 01100001 01111001 01110100 01101001</span>
+        <span class="symbol binary" style="left:24%;top:4%;animation-delay:-3s">10100101 00110110 11001001</span>
+      </div>
+      <div class="container hero-content">
+        <p class="eyebrow">Профориентация / тип по Климову</p>
+        <h1 id="hero-title">Человек — <span class="gradient-text">знаковая система</span></h1>
+        <p class="hero-copy">Профессии, где смысл закодирован в символах</p>
+        <a class="btn" href="#essence">Узнать больше <span class="arrow" aria-hidden="true">↓</span></a>
+        <p class="hero-meta">Буквы · цифры · коды · формулы · смыслы</p>
+      </div>
+    </section>
+
+    <section id="essence" aria-labelledby="essence-title">
+      <div class="container">
+        <div class="reveal">
+          <p class="eyebrow">01 / Суть</p>
+          <h2 id="essence-title">Видеть смысл <span class="gradient-text">за знаками</span></h2>
+          <p class="section-lead">Здесь работают не просто с информацией — её расшифровывают, проверяют и превращают в понятные системы: от текста и таблицы до формулы и программного кода.</p>
+        </div>
+        <div class="quality-grid">
+          <article class="quality glass reveal"><span class="quality-index">01</span><svg class="quality-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor"><path d="M6 16h20M16 6v20M9 9l14 14M23 9L9 23"/></svg><h3>Логика</h3></article>
+          <article class="quality glass reveal"><span class="quality-index">02</span><svg class="quality-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor"><circle cx="16" cy="16" r="9"/><circle cx="16" cy="16" r="3"/></svg><h3>Внимание</h3></article>
+          <article class="quality glass reveal"><span class="quality-index">03</span><svg class="quality-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor"><path d="M16 4v6M16 22v6M4 16h6M22 16h6"/><circle cx="16" cy="16" r="6"/></svg><h3>Усидчивость</h3></article>
+          <article class="quality glass reveal"><span class="quality-index">04</span><svg class="quality-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor"><path d="M7 25L25 7M9 7h16v16"/></svg><h3>Точность</h3></article>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="professions-title">
+      <div class="container">
+        <div class="reveal"><p class="eyebrow">02 / Три профессии</p><h2 id="professions-title">Разные языки.<br><span class="gradient-text">Один талант.</span></h2></div>
+        <div class="profession-grid">
+          <article class="profession-card glass reveal"><span class="profession-number">/ 001</span><h3>Программист</h3><p>Переводчик с человеческого на машинный.</p></article>
+          <article class="profession-card glass reveal"><span class="profession-number">/ 010</span><h3>Аналитик данных</h3><p>Охотник за закономерностями в цифрах.</p></article>
+          <article class="profession-card glass reveal"><span class="profession-number">/ 011</span><h3>Переводчик / лингвист</h3><p>Мост между знаковыми системами.</p></article>
+        </div>
+      </div>
+      <div class="ticker" aria-label="Другие профессии">
+        <div class="ticker-track"><span>бухгалтер</span><span>картограф</span><span>редактор</span><span>логист</span><span>шифровальщик</span><span>бухгалтер</span><span>картограф</span><span>редактор</span><span>логист</span><span>шифровальщик</span></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="future-title">
+      <div class="container future-layout">
+        <div class="future-intro reveal">
+          <p class="eyebrow">03 / Профессия будущего</p>
+          <h2 id="future-title"><span class="gradient-text">Prompt Engineer</span><br><span class="slash">/</span> Knowledge Architect</h2>
+          <p class="section-lead">Специалист, который помогает человеку и искусственному интеллекту говорить на одном языке — точно, этично и по делу.</p>
+          <blockquote class="glass">Человек становится дирижёром знаковых систем</blockquote>
+        </div>
+        <div class="timeline reveal" aria-label="Задачи специалиста">
+          <div class="timeline-item"><span>01</span><h3>Формулирует промпты</h3></div>
+          <div class="timeline-item"><span>02</span><h3>Проектирует карты знаний</h3></div>
+          <div class="timeline-item"><span>03</span><h3>Верифицирует ИИ-контент</h3></div>
+          <div class="timeline-item"><span>04</span><h3>Переводит бизнес-задачи на язык алгоритмов</h3></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="forecast-title">
+      <div class="container">
+        <div class="reveal"><p class="eyebrow">04 / Рынок труда</p><h2 id="forecast-title">Не исчезнуть.<br><span class="gradient-text">Стать сильнее.</span></h2><p class="section-lead">На горизонте 5–10 лет ценность сместится от механической обработки знаков к постановке задач, проверке результата и ответственности за смысл.</p></div>
+        <div class="forecast-grid">
+          <div class="reveal">
+            <div class="metric"><div class="metric-head"><strong>Работа с данными</strong><span class="metric-value" data-count="88">0%</span></div><div class="bar"><div class="bar-fill" data-width="88%"></div></div></div>
+            <div class="metric"><div class="metric-head"><strong>ИИ-грамотность</strong><span class="metric-value" data-count="94">0%</span></div><div class="bar"><div class="bar-fill" data-width="94%"></div></div></div>
+            <div class="metric"><div class="metric-head"><strong>Критическое мышление</strong><span class="metric-value" data-count="91">0%</span></div><div class="bar"><div class="bar-fill" data-width="91%"></div></div></div>
+            <div class="tags"><span class="tag">знаковые системы</span><span class="tag">логика</span><span class="tag">коммуникация</span><span class="tag">этика</span></div>
+          </div>
+          <div class="compare reveal">
+            <div class="compare-column"><span class="compare-label">Автоматизируется</span><ul><li>Рутинный ввод данных</li><li>Шаблонные расчёты</li><li>Первичная сортировка</li><li>Черновая генерация текста</li></ul></div>
+            <div class="compare-column"><span class="compare-label">Останется за человеком</span><ul><li>Постановка верного вопроса</li><li>Проверка контекста</li><li>Этический выбор</li><li>Создание нового смысла</li></ul></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="conclusion" aria-labelledby="conclusion-title">
+      <div class="container reveal">
+        <p class="eyebrow">05 / Вывод</p>
+        <h2 class="conclusion-copy" id="conclusion-title">Будущее — за теми, кто соединяет <span class="gradient-text">знаковые системы</span> с человеческим смыслом</h2>
+        <div class="conclusion-actions"><button class="btn" id="shareBtn" type="button">Поделиться ↗</button><a class="btn secondary" href="mailto:?subject=Человек — знаковая система&body=Давай обсудим профессии будущего">Обсудить →</a></div>
+        <p class="share-status" id="shareStatus" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner"><span class="footer-mark">Человек × Знак</span><div class="footer-links"><a href="https://ru.wikipedia.org/wiki/Климов,_Евгений_Александрович" target="_blank" rel="noopener noreferrer">Е. А. Климов</a><a href="https://ru.wikipedia.org/wiki/Профориентация" target="_blank" rel="noopener noreferrer">Классификация профессий</a></div><span>2026</span></div>
+  </footer>
+  <button class="back-top" type="button" aria-label="Наверх">↑</button>
+
+  <script>
+    (() => {
+      const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const progress = document.querySelector('.reading-progress');
+      const topButton = document.querySelector('.back-top');
+      const symbols = [...document.querySelectorAll('.symbol')];
+
+      function onScroll() {
+        const max = document.documentElement.scrollHeight - innerHeight;
+        progress.style.width = `${max > 0 ? (scrollY / max) * 100 : 0}%`;
+        topButton.classList.toggle('show', scrollY > innerHeight * .65);
+        if (!reduceMotion) symbols.forEach((symbol, index) => {
+          const speed = .035 + (index % 3) * .018;
+          symbol.style.translate = `0 ${scrollY * speed}px`;
+        });
+      }
+      addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+      topButton.addEventListener('click', () => scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }));
+
+      const reveals = document.querySelectorAll('.reveal');
+      const bars = document.querySelectorAll('.bar-fill');
+      const counters = document.querySelectorAll('[data-count]');
+      if (!('IntersectionObserver' in window) || reduceMotion) {
+        reveals.forEach(el => el.classList.add('visible'));
+        bars.forEach(el => el.style.width = el.dataset.width);
+        counters.forEach(el => el.textContent = `${el.dataset.count}%`);
+      } else {
+        const revealObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+          if (entry.isIntersecting) { entry.target.classList.add('visible'); revealObserver.unobserve(entry.target); }
+        }), { threshold: .14 });
+        reveals.forEach(el => revealObserver.observe(el));
+
+        const metricObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          entry.target.querySelectorAll('.bar-fill').forEach(el => el.style.width = el.dataset.width);
+          entry.target.querySelectorAll('[data-count]').forEach(el => {
+            const end = Number(el.dataset.count); const start = performance.now();
+            const tick = now => { const t = Math.min((now - start) / 1200, 1); el.textContent = `${Math.round(end * (1 - Math.pow(1 - t, 3)))}%`; if (t < 1) requestAnimationFrame(tick); };
+            requestAnimationFrame(tick);
+          });
+          metricObserver.unobserve(entry.target);
+        }), { threshold: .35 });
+        document.querySelectorAll('.forecast-grid').forEach(el => metricObserver.observe(el));
+      }
+
+      const cursor = document.querySelector('.cursor-dot');
+      if (matchMedia('(pointer:fine)').matches) {
+        addEventListener('pointermove', e => { cursor.style.left = `${e.clientX}px`; cursor.style.top = `${e.clientY}px`; });
+        document.querySelectorAll('a,button,.profession-card').forEach(el => {
+          el.addEventListener('pointerenter', () => cursor.classList.add('active'));
+          el.addEventListener('pointerleave', () => cursor.classList.remove('active'));
+        });
+      }
+
+      const shareButton = document.querySelector('#shareBtn');
+      const shareStatus = document.querySelector('#shareStatus');
+      shareButton.addEventListener('click', async () => {
+        const data = { title: document.title, text: 'Профессии, где смысл закодирован в символах', url: location.href };
+        try {
+          if (navigator.share) { await navigator.share(data); shareStatus.textContent = 'Спасибо, что делитесь смыслом.'; }
+          else { await navigator.clipboard.writeText(location.href); shareStatus.textContent = 'Ссылка скопирована.'; }
+        } catch (error) { if (error.name !== 'AbortError') shareStatus.textContent = 'Скопируйте ссылку из адресной строки.'; }
+      });
+    })();
+  </script>
+</body>
+</html>
